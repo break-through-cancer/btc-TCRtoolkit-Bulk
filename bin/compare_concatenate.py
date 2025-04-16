@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 
 """
-prep_gliph2_tcr.py
+gliph2_preprocess.py
 Input: adaptive TSV files
-Output: ${project_name}_tcr.txt
+Output: $concatenated_cdr3.txt
 """
 
 # Import modules
@@ -17,7 +17,6 @@ parser = argparse.ArgumentParser(description="Take positional args")
 
 # Add positional arguments
 parser.add_argument("data_dir")
-parser.add_argument("project_name")
 parser.add_argument("samplesheet")
 
 # Parse the arguments
@@ -25,7 +24,6 @@ args = parser.parse_args()
 
 # Print the arguments
 print("data_dir: ", args.data_dir)
-print("project_name: ", args.project_name)
 print("samplesheet: ", args.samplesheet)
 
 samplesheet = pd.read_csv(args.samplesheet, header=0)
@@ -43,12 +41,13 @@ for index, row in samplesheet.iterrows():
     subject_id = row['subject_id']
     timepoint = row['timepoint']
     origin = row['origin']
-    
+        
     # Add patient column
     df['patient'] = f"{subject_id}:{timepoint}_{origin}"
+    df['sample'] = row['sample']
     
     # Select relevant columns
-    df = df[['aminoAcid', 'vGeneName', 'jGeneName', 'patient', 'count (templates/reads)']]
+    df = df[['aminoAcid', 'vGeneName', 'jGeneName', 'patient', 'count (templates/reads)', 'sample']]
     dfs.append(df)
 
 
@@ -64,4 +63,4 @@ df_combined = df_combined.rename(columns={
 })
 df_combined = df_combined[df_combined['CDR3b'].notna()]
 
-df_combined.to_csv(f"{args.project_name}_tcr.txt", sep="\t", index=False, header=True)
+df_combined.to_csv(f"concatenated_cdr3.txt", sep="\t", index=False, header=True)
